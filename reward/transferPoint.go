@@ -1,7 +1,6 @@
 package reward
 
 import (
-	"strconv"
 	"lycle/util"
 
 	"github.com/go-playground/validator"
@@ -9,21 +8,14 @@ import (
 )
 
 type TransferPointRequest struct {
-	sender		string	`validate:"required,email"`
-	recipient	string	`validate:"required,email"`
-	point		int		`validate:"required,gt=0"`
+	Sender    string `validate:"required,email"`
+	Recipient string `validate:"required,email"`
+	Point     int	 `validate:"required,gt=0"`
 }
 
 type TransferPointResponse struct {
-	sender		User
-	recipient	User
-}
-
-func createTransferPointRequest(args []string) (req TransferPointRequest) {
-	req.sender = args[0]
-	req.recipient = args[1]
-	req.point, _ = strconv.Atoi(args[2])
-	return
+	Sender		User
+	Recipient	User
 }
 
 func (req TransferPointRequest) validate() (err error) {
@@ -36,8 +28,13 @@ func TransferPoint(APIstub shim.ChaincodeStubInterface, request util.Request) (r
 	var req TransferPointRequest
 	var res TransferPointResponse
 
+	// unmarshalling request 
+	err = request.Parse(&req)
+	if err != nil {
+		return
+	}
+
 	// validate request
-	req = createTransferPointRequest(request.GetArguments())
 	err = req.validate()
 	if err != nil {
 		err = util.ErrInvalidParam
@@ -45,43 +42,43 @@ func TransferPoint(APIstub shim.ChaincodeStubInterface, request util.Request) (r
 	}
 
 	// validate sender in blockchain
-	var sender User
-	sen := req.sender
-	err = util.GetState(APIstub, sen, &sender)
+	var Sender User
+	Sen := req.Sender
+	err = util.GetState(APIstub, Sen, &Sender)
 	if err != nil {
 		return
 	}
 
-	if req.point > sender.point {
+	if req.Point > Sender.Point {
 		err = util.ErrNotEnoughPoint
 		return
 	}
 
 	// validate recipient in blockchain
-	var recipient User
-	rec := req.recipient
-	err = util.GetState(APIstub, rec, &recipient)
+	var Recipient User
+	Rec := req.Recipient
+	err = util.GetState(APIstub, Rec, &Recipient)
 	if err != nil {
 		return
 	}
 
-	sender.point -= req.point
-	recipient.point += req.point
+	Sender.Point -= req.Point
+	Recipient.Point += req.Point
 
-	sender.updateAt = util.GetTimestamp()
-	recipient.updateAt = sender.updateAt
+	Sender.UpdatedAt = util.GetTimestamp()
+	Recipient.UpdatedAt = Sender.UpdatedAt
 
-	err = util.PutState(APIstub, sen, sender)
+	err = util.PutState(APIstub, Sen, Sender)
 	if err != nil {
 		return
 	}
-	err = util.PutState(APIstub, rec, recipient)
+	err = util.PutState(APIstub, Rec, Recipient)
 	if err != nil {
 		return
 	}
 
-	res.sender = sender
-	res.recipient = recipient
+	res.Sender = Sender
+	res.Recipient = Recipient
 
 	response.SetData(res)
 
