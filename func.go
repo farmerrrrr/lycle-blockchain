@@ -24,6 +24,8 @@ func (s *SmartContract) Do(APIstub shim.ChaincodeStubInterface) (peer.Response) 
 		res, err = f.GetPoint(APIstub, req)
 	case util.TransferPoint:
 		res, err = f.TransferPoint(APIstub, req)
+	case util.DepositPoint:
+		res, err = f.DepositPoint(APIstub, req)
 	default:
 		err = util.ErrInvalidFunc
 	}

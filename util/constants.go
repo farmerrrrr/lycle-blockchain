@@ -9,6 +9,7 @@ const (
 	RegisterUser  = "registerUser"
 	GetPoint      = "getPoint"
 	TransferPoint = "transferPoint"
+	DepositPoint  = "depositPoint"
 )
 
 const (
