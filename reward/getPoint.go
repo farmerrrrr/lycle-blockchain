@@ -8,16 +8,11 @@ import (
 )
 
 type GetPointRequest struct {
-	email string `validate:"required,email"`
+	Email string `validate:"required,email"`
 }
 
 type GetPointResponse struct {
-	user User
-}
-
-func createGetPointRequest(args []string) (req GetPointRequest) {
-	req.email = args[0]
-	return
+	User User
 }
 
 func (req GetPointRequest) validate() (err error) {
@@ -30,22 +25,29 @@ func GetPoint(APIstub shim.ChaincodeStubInterface, request util.Request) (respon
 	var req GetPointRequest
 	var res GetPointResponse
 
+	// unmarshalling request 
+	err = request.Parse(&req)
+	if err != nil {
+		return 
+	}
+
 	// validate request
-	req = createGetPointRequest(request.GetArguments())
 	err = req.validate()
 	if err != nil {
 		err = util.ErrInvalidParam
 		return
 	}
 
-	var user User
-	key := req.email
-	err = util.GetState(APIstub, key, &user)
+	Usr := User{}
+	key := req.Email
+	err = util.GetState(APIstub, key, &Usr)
 	if err != nil {
 		return
 	}
 
-	res.user = user
+	res.User = Usr
 
 	response.SetData(res)
+
+	return
 }
