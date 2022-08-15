@@ -10,16 +10,11 @@ import (
 const defaultPoint int = 0
 
 type RegisterUserRequest struct {
-	email string `validate:"required,email"`
+	Email string `validate:"required,email"`
 }
 
 type RegisterUserResponse struct {
-	user User
-}
-
-func createRegisterUserRequest(args []string) (req RegisterUserRequest) {
-	req.email = args[0]
-	return
+	User User
 }
 
 func (req RegisterUserRequest) validate() (err error) {
@@ -32,8 +27,13 @@ func RegisterUser(APIstub shim.ChaincodeStubInterface, request util.Request) (re
 	var req RegisterUserRequest
 	var res RegisterUserResponse
 
+	// unmarshalling request 
+	err = request.Parse(&req)
+	if err != nil {
+		return 
+	}
+
 	// validate request
-	req = createRegisterUserRequest(request.GetArguments())
 	err = req.validate()
 	if err != nil {
 		err = util.ErrInvalidParam
@@ -41,26 +41,29 @@ func RegisterUser(APIstub shim.ChaincodeStubInterface, request util.Request) (re
 	}
 
 	// check to user in blockchain
-	var user User
-	key := req.email
-	err = util.GetState(APIstub, key, &user)
+	var Usr User
+	key := req.Email
+	err = util.GetState(APIstub, key, &Usr)
 	if err != nil {
 		if err != util.ErrNoDataFound { // no data found면, continue
 			return
 		}
+	} else {
+		err = util.ErrAlreadyExists
+		return
 	}
 
-	user.email = req.email
-	user.point = defaultPoint
-	user.registeredAt = util.GetTimestamp() // getTimestamp 에러 처리 필요
-	user.updateAt = user.registeredAt
+	Usr.Email = req.Email
+	Usr.Point = defaultPoint
+	Usr.RegisteredAt = util.GetTimestamp() // getTimestamp 에러 처리 필요
+	Usr.UpdatedAt = Usr.RegisteredAt
 
-	err = util.PutState(APIstub, key, user)
+	err = util.PutState(APIstub, key, Usr)
 	if err != nil {
 		return
 	}
 
-	res.user = user
+	res.User = Usr
 
 	response.SetData(res)
 
