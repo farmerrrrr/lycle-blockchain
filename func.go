@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	f "lycle/reward"
 	"lycle/util"
 
@@ -12,7 +11,7 @@ import (
 type SmartContract struct {
 }
 
-func (s *SmartContract) Do(APIstub shim.ChaincodeStubInterface) (response peer.Response) {
+func (s *SmartContract) Do(APIstub shim.ChaincodeStubInterface) (peer.Response) {
 	req := util.GenerateRequest(APIstub)
 
 	var res util.Response
@@ -24,18 +23,10 @@ func (s *SmartContract) Do(APIstub shim.ChaincodeStubInterface) (response peer.R
 	case util.GetPoint:
 		res, err = f.GetPoint(APIstub, req)
 	case util.TransferPoint:
-		res, err = TransferPoint(APIstub, req)
+		res, err = f.TransferPoint(APIstub, req)
 	default:
 		err = util.ErrInvalidFunc
 	}
 
-	util.GenerateResponse(&res, err)
-
-	resAsBytes, _ := json.Marshal(res)
-
-	if err != nil {
-		return shim.Error(string(resAsBytes))
-	}
-
-	shim.Success(resAsBytes)
+	return util.GenerateResponse(res, err)
 }
