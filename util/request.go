@@ -1,10 +1,14 @@
 package util
 
-import "github.com/hyperledger/fabric/core/chaincode/shim"
+import (
+	"encoding/json"
+
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+)
 
 type Request struct {
 	function  string
-	arguments []string
+	arguments *[]byte
 }
 
 func (req Request) GetFunction() string {
@@ -15,19 +19,30 @@ func (req *Request) SetFunction(function string) {
 	req.function = function
 }
 
-func (req Request) GetArguments() []string {
+func (req Request) GetArguments() *[]byte {
 	return req.arguments
 }
 
-func (req *Request) SetArguments(args []string) {
+func (req *Request) SetArguments(args *[]byte) {
 	req.arguments = args
 }
 
 func GenerateRequest(APIstub shim.ChaincodeStubInterface) (req Request) {
-	function, args := APIstub.GetFunctionAndParameters()
+	args := APIstub.GetArgs()
+	function := string(args[FunctionName])
+	parameter := &(args[Parameter])
 
 	req.SetFunction(function)
-	req.SetArguments(args)
+	req.SetArguments(parameter)
 
+	return
+}
+
+func (req Request) Parse(apiReq interface{}) (err error) {
+	err = json.Unmarshal(*req.arguments, apiReq)
+	if err != nil {
+		err = ErrMarshalFailed
+		return
+	}
 	return
 }
