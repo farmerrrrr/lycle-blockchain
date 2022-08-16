@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	f "lycle/reward"
 	"lycle/util"
 
@@ -12,7 +13,12 @@ type SmartContract struct {
 }
 
 func (s *SmartContract) Do(APIstub shim.ChaincodeStubInterface) (peer.Response) {
+	fmt.Println("** Transaction ID: " + APIstub.GetTxID())
+
 	req := util.GenerateRequest(APIstub)
+
+	fmt.Print("function name: " + req.GetFunction() + ", arguments: ")
+	fmt.Println(string(*req.GetArguments()))
 
 	var res util.Response
 	var err error

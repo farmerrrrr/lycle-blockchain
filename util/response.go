@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -45,8 +46,11 @@ func GenerateResponse(res Response, err error) peer.Response {
 	resAsBytes, _ := json.Marshal(res)
 
 	if err != nil {
+		fmt.Println("Error occurred while processing transaction. err: " + err.Error())
 		return shim.Error(string(resAsBytes))
 	}
+
+	fmt.Println("Generated response as a result of transaction: " + string(resAsBytes))
 
 	return shim.Success(resAsBytes)
 }
