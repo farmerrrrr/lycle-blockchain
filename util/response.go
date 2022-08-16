@@ -8,29 +8,29 @@ import (
 )
 
 type Response struct {
-	statusMessage string
-	timestamp     string
-	data          interface{}
+	StatusMessage string
+	Timestamp     string
+	Data          interface{}
 }
 
 func (res *Response) SetTimestamp(timestamp string) {
-	res.timestamp = timestamp
+	res.Timestamp = timestamp
 }
 
 func (res Response) GetStatusMessage() string {
-	return res.statusMessage
+	return res.StatusMessage
 }
 
 func (res *Response) SetStatusMessage(statusMessage string) {
-	res.statusMessage = statusMessage
+	res.StatusMessage = statusMessage
 }
 
 func (res Response) GetData() interface{} {
-	return res.data
+	return res.Data
 }
 
-func (res Response) SetData(data interface{}) {
-	res.data = data
+func (res *Response) SetData(data interface{}) {
+	res.Data = data
 }
 
 func GenerateResponse(res Response, err error) peer.Response {
